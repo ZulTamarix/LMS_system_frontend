@@ -1,0 +1,174 @@
+import { useState } from "react";
+import { Outlet, NavLink, useNavigate } from "react-router";
+import {
+  LayoutDashboard,
+  Users,
+  BookOpen,
+  Award,
+  FileText,
+  Building2,
+  Settings,
+  Menu,
+  X,
+  User,
+  LogOut,
+  Search,
+  GraduationCap,
+  UserCheck,
+  IdCard,
+} from "lucide-react";
+import exibyteLogo from "figma:asset/a4cfe9bd1927990d0a64f23cf7f0aeef602f8fa0.png";
+
+export default function AdminLayout() {
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("adminAuth");
+    navigate("/login");
+  };
+
+  const navItems = [
+    { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/admin/users", label: "Users", icon: Users },
+    { path: "/admin/courses", label: "Courses", icon: BookOpen },
+    { path: "/admin/role-assignment", label: "Role-Based Assignment", icon: UserCheck },
+    { path: "/admin/training-passport", label: "Training Passport", icon: IdCard },
+    { path: "/admin/certifications", label: "Certifications", icon: Award },
+    { path: "/admin/reports", label: "Reports", icon: FileText },
+    { path: "/admin/entities", label: "Entities", icon: Building2 },
+    { path: "/admin/settings", label: "Settings", icon: Settings },
+  ];
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`
+        fixed lg:static inset-y-0 left-0 z-50
+        w-64 bg-[#1e3a8a] border-r border-[#1e293b] flex flex-col
+        transform transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+      `}
+      >
+        {/* Logo */}
+        <div className="h-16 flex items-center justify-between px-6 border-b border-[#1e293b]">
+          <div className="flex items-center gap-2">
+            <img src={exibyteLogo} alt="Exibyte LMS" className="h-8 w-auto" />
+          </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden text-white hover:bg-[#1e293b] p-2 rounded-lg"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 overflow-y-auto">
+          <ul className="space-y-1">
+            {navItems.map((item) => (
+              <li key={item.path}>
+                <NavLink
+                  to={item.path}
+                  end={item.path === "/admin"}
+                  onClick={() => setSidebarOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                      isActive
+                        ? "bg-[#d97706] text-white"
+                        : "text-white hover:bg-[#1e293b]"
+                    }`
+                  }
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {/* Bottom Section */}
+        <div className="p-4 border-t border-[#1e293b] space-y-2">
+          <div className="flex items-center gap-3 px-3 py-2">
+            <div className="w-8 h-8 bg-[#d97706] rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">Admin User</p>
+              <p className="text-xs text-blue-200 truncate">admin@company.com</p>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-white hover:bg-[#1e293b]"
+          >
+            <LogOut className="w-5 h-5" />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden w-full">
+        {/* Top Bar */}
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6">
+          <div className="flex items-center gap-4 flex-1">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden text-gray-600 hover:bg-gray-100 p-2 rounded-lg"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <div className="flex-1 max-w-2xl">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="w-8 h-8 bg-[#1e40af] rounded-full flex items-center justify-center text-white">
+              <User className="w-5 h-5" />
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-auto">
+          <div className="max-w-[1440px] mx-auto p-4 md:p-6">
+            <Outlet />
+          </div>
+          
+          {/* Footer */}
+          <div className="bg-white border-t border-gray-200 py-4 mt-8">
+            <div className="max-w-[1440px] mx-auto px-4 md:px-6">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-gray-600">
+                  © 2026 Enterprise LMS. All rights reserved.
+                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-gray-500">Powered by</p>
+                  <img src={exibyteLogo} alt="Exibyte" className="h-5 w-auto" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
