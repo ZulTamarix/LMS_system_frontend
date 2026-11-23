@@ -1,14 +1,7 @@
 import { Search, Filter, Plus, MoreVertical, X, Eye } from "lucide-react";
 import { Badge } from "../../components/ui/badge";
-import { useState } from "react";
-
-const users = [
-  { id: 1, name: "Sarah Johnson", email: "sarah.j@company.com", role: "Manager", department: "Sales", status: "Active", courses: 12, jobTitle: "Sales Manager", phone: "+1 (555) 234-5678", assignedCourses: [1, 2, 3, 4] },
-  { id: 2, name: "Michael Chen", email: "michael.c@company.com", role: "Employee", department: "Engineering", status: "Active", courses: 8, jobTitle: "Senior Developer", phone: "+1 (555) 345-6789", assignedCourses: [1, 3, 5] },
-  { id: 3, name: "Emily Rodriguez", email: "emily.r@company.com", role: "Employee", department: "Marketing", status: "Active", courses: 15, jobTitle: "Marketing Specialist", phone: "+1 (555) 456-7890", assignedCourses: [1, 2, 3, 4, 5] },
-  { id: 4, name: "David Kim", email: "david.k@company.com", role: "Admin", department: "HR", status: "Active", courses: 20, jobTitle: "HR Administrator", phone: "+1 (555) 567-8901", assignedCourses: [1, 2, 3, 4, 5] },
-  { id: 5, name: "Lisa Anderson", email: "lisa.a@company.com", role: "Manager", department: "Operations", status: "Inactive", courses: 5, jobTitle: "Operations Manager", phone: "+1 (555) 678-9012", assignedCourses: [1, 2] },
-];
+import { useCallback, useEffect, useState } from "react";
+import { User_type } from "../../interfaces/user";
 
 const availableCourses = [
   { id: 1, title: "Battery Replacement SOP", category: "Mandatory" },
@@ -17,6 +10,19 @@ const availableCourses = [
   { id: 4, title: "Roadside Assistance Protocol", category: "Mandatory" },
   { id: 5, title: "Customer Handling & Upselling", category: "Skills" },
 ];
+
+
+import Table, { type Column } from "../../components/ui_2nd/Table";
+import Grid from "../../components/ui_2nd/Grid";
+import Form from "../../components/ui_2nd/Form";
+import Field from "../../components/ui_2nd/Field";
+import Button from "../../components/ui_2nd/Button";
+import Searchbar from "../../components/ui_2nd/Searchbar";
+import SplitPanel from "../../components/ui_2nd/SplitPanel";
+import Alert from "../../components/ui_2nd/Alert";
+
+import api from "../../api/axios";
+
 
 export default function Users() {
 
@@ -49,10 +55,57 @@ export default function Users() {
       status: "Active",
       courses: [] as number[],
     });
+
+
+    // searchbar
+    const [searchDatabase, setSearchDatabase] = useState('')
+    // detect error
+    const [isAlert, setIs_alert] = useState(false);
+    // spinner
+    const [spinner, setSpinner] = useState(false)
+    // loadin
+    const [isLoading, setIsLoading] = useState(false)
+    // crud
+    const [crud, setCrud] = useState<'create'|'edit'|'view'>('create')
+    // form
+    const [formUser, setForm_user] = useState(false)
+    const [user, setUser] = useState<User_type>({
+      id: 0,
+      usr_role: 'user',
+      usr_name: '',
+      usr_phoneNo: '',
+      usr_email: '',
+      usr_company: '',
+      usr_username: '',
+      usr_password: '',
+      usr_status: 'active',
+    });
+
+
   // #endregion
 
 
-  // #region 2) -> method
+  // #region 2) --> useEffect
+      // reset fieldname everytime form_user closed
+      useEffect(() => {
+          if(!formUser) {
+              setUser ({
+                id: 0,
+                usr_role: 'user',
+                usr_name: '',
+                usr_phoneNo: '',
+                usr_email: '',
+                usr_company: '',
+                usr_username: '',
+                usr_password: '',
+                usr_status: 'active',
+              })
+          }
+      }, [formUser])
+  //#endregion
+
+
+  // #region 3_old) -> method
     const handleViewUser = (user: any) => {
       setSelectedUser(user);
       setIsEditMode(false);
@@ -94,7 +147,6 @@ export default function Users() {
     const handleSaveEdit = (e: React.FormEvent) => {
       e.preventDefault();
       // Handle save edit
-      console.log("User updated:", editFormData);
       setIsEditMode(false);
       // Update selectedUser with new data
       const updatedUser = {
@@ -141,7 +193,6 @@ export default function Users() {
       const employeeId = generateEmployeeId();
       const submissionData = { ...formData, employeeId };
       // Handle form submission
-      console.log("Form submitted:", submissionData);
       setShowAddUserModal(false);
       // Reset form
       setFormData({
@@ -161,105 +212,322 @@ export default function Users() {
   // #endregion
 
 
+  // #region 3) -> method
+
+    // READ user
+    useEffect(() => {
+        fetchData_user()
+    }, [])
+
+    // CREATE user
+    const handleCreate_user = async () => {
+
+        // loading
+        setIsLoading(true)
+
+        // CREATE data
+        try {
+            await api.post(`/user`, user);
+
+            fetchData_user()
+            setForm_user(false)
+        }
+        catch(error) {
+            console.error('Error:', error); // use only to remove warning on vscode
+            // console.error('Response status:', error.response?.data);
+        }
+        finally {
+            setIsLoading(false)
+        }
+    }
+
+    // UPDATE user
+    const handleUpdate_user = async () => {
+
+        // loading
+        setIsLoading(true)
+
+        // UPDATE data
+        try {
+            await api.put(`/user/${user.id}`, user);
+            fetchData_user()
+            setForm_user(false)
+        }
+        catch(error) {
+            console.error('Error:', error); // use only to remove warning on vscode
+            // console.error('Response status:', error.response?.data);
+        }
+        finally {
+            setIsLoading(false)
+        }
+    }
+
+    // DELETE user
+    const handleDelete_user = async () => {
+        
+        setIsLoading(true)
+
+        // DELETE data
+        try {
+            await  api.delete(`/user/${user.id}`)
+
+            fetchData_user()
+            setForm_user(false)
+            setIs_alert(false)
+        }
+        catch(error) {
+            console.error('Error:', error); // use only to remove warning on vscode
+            // console.error('Response status:', error.response?.data);
+        }
+        finally {
+            setIsLoading(false)
+        }
+    }
+
+  // #endregion
+
+
+  // #region 4) --> database
+
+      // fetch user
+      const [databaseUser, setDatabase_user] = useState<User_type[]>([])
+      const fetchData_user = useCallback(() => {
+          
+          // loading
+          setSpinner(true)
+
+          api.get(`/user`)
+          .then((response) => {
+              // console.log('response  = ',response.data.data)
+              setDatabase_user(response.data.data);
+          })
+          .catch((error) => {
+              console.error('Error fetching:', error);
+          })
+          .finally(() => {
+              setSpinner(false)
+          })
+      }, []);
+
+      // tableTitle
+      const tableTitle_user: Column<User_type>[] = [
+          {
+              key: "1",
+              header: "Name",
+              render: (row) => 
+                <span>{row.usr_name}</span>
+          },
+          {
+              key: "2",
+              header: "Phone number",
+              render: (row) => 
+                <span>{row.usr_phoneNo}</span>
+          },
+          {
+              key: "3",
+              header: "Email",
+              render: (row) => 
+                <span>{row.usr_email}</span>
+          },
+          {
+              key: "4",
+              header: "Company",
+              render: (row) => 
+                <span>{row.usr_company}</span>
+          },
+          {
+              key: "5",
+              header: "Status",
+              render: (row) => (
+                <>
+                    {row.usr_status == 'active' ? (
+                        <span className="py-1 px-2 rounded-full bg-green-100 text-green-600">Active</span>
+                    ) : (
+                        <span className="py-1 px-2 rounded-full bg-slate-100 text-slate-600">Inactive</span>
+                    )} 
+                </>
+              )
+          },
+          
+          {
+              key: "",
+              header: "Action",
+              align: "center",
+              render: (row) => (
+                <div className="flex gap-3">
+                    <button onClick={() => { setUser(row); setForm_user(true); setCrud('edit') }} className="border border-amber-400 text-amber-400 p-1 px-2 text-sm rounded-md cursor-pointer">
+                        Edit
+                    </button>
+                    
+                    <button onClick={() => { setUser(row); setIs_alert(true) }} className="border border-red-400 text-red-400 p-1 px-2 text-sm rounded-md cursor-pointer">
+                        Delete
+                    </button>
+                </div>
+              )
+          },
+      ];
+
+  //#endregion
+
+
+  //#region 5) --> searchbar
+      const filteredUser = databaseUser.filter((data) => {
+          const search = searchDatabase.toLowerCase().trim()
+
+          return (
+            data.usr_name?.toLowerCase().includes(search) ||
+            data.usr_phoneNo?.toLowerCase().includes(search) ||
+            data.usr_email?.toLowerCase().includes(search) ||
+            data.usr_company?.toLowerCase().includes(search) ||
+            data.usr_status?.toLowerCase().includes(search)
+          )
+      })
+  //#endregion
+
+
   return (
     <div className="space-y-4 md:space-y-6">
+
+      {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl md:text-2xl font-semibold text-gray-900">Users</h1>
           <p className="text-xs md:text-sm text-gray-500 mt-1">Manage employee accounts and permissions</p>
         </div>
-        <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[#1e3a8a] text-white rounded-lg hover:bg-[#1e293b]" onClick={() => setShowAddUserModal(true)}>
+        <button onClick={()=> {setForm_user(true); setCrud('create')}} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#1e3a8a] text-white rounded-lg hover:bg-[#1e293b]">
+        {/* <button onClick={() => setShowAddUserModal(true)} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#1e3a8a] text-white rounded-lg hover:bg-[#1e293b]"> */}
+
           <Plus className="w-4 h-4" />
           Add User
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search users..."
-                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
-              />
-            </div>
-            <button className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">
-              <Filter className="w-4 h-4" />
-              Filter
-            </button>
-          </div>
-        </div>
+      <SplitPanel
+          content_1={
+            <>
+              {/* Searchbar */}
+              <Grid>
+                  <Searchbar value={searchDatabase} onChange={(e: any) => setSearchDatabase(e.target.value)} placeholder="Search by name, phone number, ...."/>
+              </Grid>
+            </>
+          }
+          content_2={
+            <>
+              {/* Table */}
+              <Grid>
+                  <Table fieldName={tableTitle_user} data={filteredUser} loading={spinner} />
+              </Grid>
+            </>
+          }
+      />
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                  Role
-                </th>
-                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                  Department
-                </th>
-                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                  Courses
-                </th>
-                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-4 md:px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-[#1e40af]">
-                          {user.name.split(' ').map(n => n[0]).join('')}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                        <div className="text-sm text-gray-500">{user.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 md:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
-                    <span className="text-sm text-gray-900">{user.role}</span>
-                  </td>
-                  <td className="px-4 md:px-6 py-4 whitespace-nowrap hidden md:table-cell">
-                    <span className="text-sm text-gray-900">{user.department}</span>
-                  </td>
-                  <td className="px-4 md:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-                    <span className="text-sm text-gray-900">{user.courses} courses</span>
-                  </td>
-                  <td className="px-4 md:px-6 py-4 whitespace-nowrap">
-                    <Badge variant={user.status === 'Active' ? 'default' : 'secondary'}>
-                      {user.status}
-                    </Badge>
-                  </td>
-                  <td className="px-4 md:px-6 py-4 whitespace-nowrap">
-                    <button className="p-2 hover:bg-gray-100 rounded-lg" onClick={() => handleViewUser(user)}>
-                      <Eye className="w-4 h-4 text-gray-600" />
-                    </button>
-                    <button className="p-2 hover:bg-gray-100 rounded-lg">
-                      <MoreVertical className="w-4 h-4 text-gray-600" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Form */}
+      <Form title={crud=='create'? 'Add User':'Edit User'} isOpen={formUser} onClose={() => setForm_user(false)} width="max-w-lg"
+          
+          footer={
+              <>
+                  <Button
+                      label="Cancel"
+                      className="w-24"
+                      onClick={() => setForm_user(false)}
+                      disabled={isLoading}
+                  />
+
+                  {crud == 'create' ? (
+                      <Button
+                          label="Save"
+                          className="w-24"
+                          onClick={handleCreate_user}
+                          disabled={isLoading || Object.values(user).some(value => value === "")}
+
+                      />
+                  ) : (
+                      <Button
+                          label="Update"
+                          className="w-24"
+                          onClick={handleUpdate_user}
+                          disabled={isLoading || Object.values(user).some(value => value === "")}
+
+                      />
+                  )}
+
+              </>
+          }
+      >
+          <div className="space-y-4">
+              {/* for all role */}
+              <Field
+                  label="Name"
+                  placeholder="Enter name"
+                  value={user.usr_name}
+                  onChange={(e) => setUser({ ...user, usr_name: e.target.value })}
+              />
+
+              <Field
+                  label="Phone Number"
+                  placeholder="Enter phone number"
+                  value={user.usr_phoneNo}
+                  onChange={(e) => setUser({ ...user, usr_phoneNo: e.target.value })}
+              />
+
+              <Field
+                  label="Email"
+                  placeholder="Enter email"
+                  value={user.usr_email}
+                  onChange={(e) => setUser({ ...user, usr_email: e.target.value })}
+              />
+
+              <Field
+                  label="Company"
+                  placeholder="Enter company"
+                  value={user.usr_company}
+                  onChange={(e) => setUser({ ...user, usr_company: e.target.value })}
+              />
+
+              <Field
+                  label="Username"
+                  placeholder="Enter username"
+                  value={user.usr_username}
+                  onChange={(e) => setUser({ ...user, usr_username: e.target.value })}
+              />
+
+              <Field
+                  label="Password"
+                  placeholder="Enter password"
+                  value={user.usr_password}
+                  onChange={(e) => setUser({ ...user, usr_password: e.target.value })}
+                  type="password"
+              />
+
+              <Field
+                  label="Status"
+                  placeholder="Enter status"
+                  value={user.usr_status}
+                  onChange={(e) => setUser({ ...user, usr_status: e.target.value as 'active' | 'inactive' })}
+                  type="select"   
+                  options={[
+                      { label: 'Active', value: 'active' },
+                      { label: 'Inactive', value: 'inactive' },
+                  ]}
+              />
+          </div>
+      </Form>
+
+      
+      {/* Delete user */}
+      <Alert
+          open={isAlert}
+          title="Delete this user?"
+          description="This action can't be undone."
+          isLoading={isLoading}
+          confirmLabel="Delete"
+          onCancel={() => setIs_alert(false)}
+          onConfirm={() => {
+              // do your action here
+              handleDelete_user()
+          }}
+      />
+
 
       {/* Add User Modal */}
       {showAddUserModal && (

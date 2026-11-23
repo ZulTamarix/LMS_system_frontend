@@ -16,6 +16,7 @@ import {
   GraduationCap,
   UserCheck,
   IdCard,
+  NotebookText,
 } from "lucide-react";
 import exibyteLogo from "figma:asset/a4cfe9bd1927990d0a64f23cf7f0aeef602f8fa0.png";
 
@@ -32,7 +33,8 @@ export default function AdminLayout() {
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/users", label: "Users", icon: Users },
     { path: "/admin/courses", label: "Courses", icon: BookOpen },
-    { path: "/admin/role-assignment", label: "Role-Based Assignment", icon: UserCheck },
+    { path: "/admin/assessment", label: "Assessment", icon: NotebookText },
+    // { path: "/admin/role-assignment", label: "Role-Based Assignment", icon: UserCheck },
     { path: "/admin/training-passport", label: "Training Passport", icon: IdCard },
     { path: "/admin/certifications", label: "Certifications", icon: Award },
     { path: "/admin/reports", label: "Reports", icon: FileText },
@@ -119,55 +121,36 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden w-full">
-        {/* Top Bar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6">
-          <div className="flex items-center gap-4 flex-1">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-gray-600 hover:bg-gray-100 p-2 rounded-lg"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div className="flex-1 max-w-2xl">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 md:gap-4">
-            <div className="w-8 h-8 bg-[#1e40af] rounded-full flex items-center justify-center text-white">
-              <User className="w-5 h-5" />
-            </div>
-          </div>
-        </header>
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-auto">
-          <div className="max-w-[1440px] mx-auto p-4 md:p-6">
-            <Outlet />
-          </div>
-          
-          {/* Footer */}
-          <div className="bg-white border-t border-gray-200 py-4 mt-8">
-            <div className="max-w-[1440px] mx-auto px-4 md:px-6">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-sm text-gray-600">
-                  © 2026 Enterprise LMS. All rights reserved.
-                </p>
-                <div className="flex items-center gap-2">
-                  <p className="text-xs text-gray-500">Powered by</p>
-                  <img src={exibyteLogo} alt="Exibyte" className="h-5 w-auto" />
-                </div>
+          {/* Top Bar */}
+          <header className="h-16 shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6">
+              {/* Your existing header content */}
+          </header>
+
+          {/* Page Content */}
+          <main className="flex-1">
+              <div className="max-w-[1440px] mx-auto p-4 md:p-6">
+                  <Outlet />
               </div>
-            </div>
-          </div>
-        </main>
+          </main>
+
+          {/* Footer */}
+          <footer className="bg-white border-t border-gray-200 py-4 mt-8">
+              <div className="max-w-[1440px] mx-auto px-4 md:px-6">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <p className="text-sm text-gray-600">
+                          © 2026 Enterprise LMS. All rights reserved.
+                      </p>
+
+                      <div className="flex items-center gap-2">
+                          <p className="text-xs text-gray-500">Powered by</p>
+                          <img src={exibyteLogo} alt="Exibyte" className="h-5 w-auto" />
+                      </div>
+                  </div>
+              </div>
+          </footer>
+
       </div>
     </div>
   );

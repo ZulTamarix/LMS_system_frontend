@@ -6,6 +6,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Users from "./pages/admin/Users";
 import Courses from "./pages/admin/Courses";
 import RoleBasedAssignment from "./pages/admin/RoleBasedAssignment";
+import Assessment from "./pages/admin/Assessment";
 import TrainingPassport from "./pages/admin/TrainingPassport";
 import Certifications from "./pages/admin/Certifications";
 import Reports from "./pages/admin/Reports";
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
       { index: true, Component: Dashboard },
       { path: "users", Component: Users },
       { path: "courses", Component: Courses },
+      { path: "assessment", Component: Assessment },
       { path: "role-assignment", Component: RoleBasedAssignment },
       { path: "training-passport", Component: TrainingPassport },
       { path: "certifications", Component: Certifications },

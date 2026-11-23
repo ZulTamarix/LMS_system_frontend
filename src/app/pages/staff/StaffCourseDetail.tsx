@@ -370,6 +370,8 @@ export default function StaffCourseDetail() {
           </div>
         </div>
       </div>
+
+      
     </div>
   );
 }

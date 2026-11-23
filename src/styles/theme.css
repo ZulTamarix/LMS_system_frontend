@@ -12,6 +12,8 @@
   --primary-foreground: #ffffff;
   --secondary: #d97706;
   --secondary-foreground: #ffffff;
+  --tertiary: #f9fafb;
+  --tertiary-foreground: #ffffff;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --accent: #fef3c7;
@@ -39,6 +41,8 @@
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #1e293b;
   --sidebar-ring: #d97706;
+
+  
 }
 
 .dark {
@@ -89,6 +93,8 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-foreground: var(--tertiary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
