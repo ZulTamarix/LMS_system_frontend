@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router";
 import AdminLayout from "./layouts/AdminLayout";
 import MobileLayout from "./layouts/MobileLayout";
 import StaffLayout from "./layouts/StaffLayout";
-import Dashboard from "./pages/admin/Dashboard";
+import Admin_Dashboard from "./pages/admin/Dashboard";
 import Users from "./pages/admin/Users";
 import Courses from "./pages/admin/Courses";
 import RoleBasedAssignment from "./pages/admin/RoleBasedAssignment";
@@ -17,12 +17,16 @@ import Home from "./pages/mobile/Home";
 import CourseDetail from "./pages/mobile/CourseDetail";
 import Certificate from "./pages/mobile/Certificate";
 import Notifications from "./pages/mobile/Notifications";
-import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffCourseDetail from "./pages/staff/StaffCourseDetail";
 import StaffCertificate from "./pages/staff/StaffCertificate";
 import PortalSelector from "./pages/PortalSelector";
 import UnifiedLogin from "./pages/UnifiedLogin";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+import Staff_Dashboard from "./pages/admin/Dashboard";
+import Staff_Courses from "./pages/staff/Course";
+import Staff_User from "./pages/staff/User";
+
 
 export const router = createBrowserRouter([
   {
@@ -41,7 +45,8 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, Component: Dashboard },
+      { index: true, element: <Navigate to="/admin/dashboard" replace /> },
+      { path: "dashboard", Component: Admin_Dashboard },
       { path: "users", Component: Users },
       { path: "courses", Component: Courses },
       { path: "assessment", Component: Assessment },
@@ -59,11 +64,17 @@ export const router = createBrowserRouter([
   },
   {
     path: "/staff",
-    Component: StaffLayout,
+    element: (
+      <ProtectedRoute>
+        <StaffLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <Navigate to="/staff/dashboard" replace /> },
-      { path: "dashboard", Component: StaffDashboard },
-      { path: "course/:id", Component: StaffCourseDetail },
+      { path: "dashboard", Component: Staff_Dashboard },
+      { path: "users", Component: Staff_User },
+      { path: "courses", Component: Staff_Courses },
+      // { path: "course/:id", Component: StaffCourseDetail },
       { path: "certificate/:id", Component: StaffCertificate },
     ],
   },

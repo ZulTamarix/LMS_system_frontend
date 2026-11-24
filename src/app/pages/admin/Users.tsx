@@ -63,7 +63,7 @@ export default function Users() {
     const [isAlert, setIs_alert] = useState(false);
     // spinner
     const [spinner, setSpinner] = useState(false)
-    // loadin
+    // loading
     const [isLoading, setIsLoading] = useState(false)
     // crud
     const [crud, setCrud] = useState<'create'|'edit'|'view'>('create')

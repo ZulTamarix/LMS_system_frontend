@@ -143,9 +143,6 @@ export default function Assessment() {
         // UPDATE assessment
         const handleUpdate_question = async () => {
 
-            console.log('data = ',questions)
-            console.log('id = ',assessment.id)
-
             // loading
             setIsLoading(true)
 

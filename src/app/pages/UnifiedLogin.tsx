@@ -4,44 +4,34 @@ import { Lock, User, AlertCircle, GraduationCap, Briefcase, LogIn, Eye, EyeOff, 
 import exibyteLog from "figma:asset/a4cfe9bd1927990d0a64f23cf7f0aeef602f8fa0.png";
 import Field from "../components/ui_2nd/Field";
 import { User_type } from "../interfaces/user";
+import api from "../api/axios";
 
 type LoginType = "admin" | "staff";
 
 export default function UnifiedLogin() {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<LoginType>("staff");
-  
-  // Admin state
-  const [adminUsername, setAdminUsername] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
-  const [adminError, setAdminError] = useState("");
-  const [showAdminPassword, setShowAdminPassword] = useState(false);
-  
-  // Staff state
-  const [staffEmail, setStaffEmail] = useState("");
-  const [staffPassword, setStaffPassword] = useState("");
-  const [showStaffPassword, setShowStaffPassword] = useState(false);
 
-  const handleAdminLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setAdminError("");
+  // #region 2) -> from Zulhazmi
 
-    if (adminUsername === "admin" && adminPassword === "password@1") {
-      localStorage.setItem("adminAuth", "true");
-      navigate("/admin");
-    } else {
-      setAdminError("Invalid username or password");
-    }
-  };
+    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState<LoginType>("staff");
+    
+    // Admin state
+    const [adminEmail, setAdminEmail] = useState("test");
+    const [adminPassword, setAdminPassword] = useState("abc123");
+    const [adminError, setAdminError] = useState("");
+    const [showAdminPassword, setShowAdminPassword] = useState(false);
+    
+    // Staff state
+    const [staffEmail, setStaffEmail] = useState("test");
+    const [staffPassword, setStaffPassword] = useState("abc123");
+    const [showStaffPassword, setShowStaffPassword] = useState(false);
 
-  const handleStaffLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simple authentication - store in localStorage
-    localStorage.setItem("staffAuth", "true");
-    localStorage.setItem("staffEmail", staffEmail);
-    localStorage.setItem("staffRole", "Technician");
-    navigate("/staff/dashboard");
-  };
+
+    const handleRegister = (e: React.FormEvent) => {
+      
+    };
+
+  // #endregion
 
   // #region 2) -> from Zulhazmi
     const [type, setType] = useState<'login' | 'register'>('login')
@@ -58,6 +48,29 @@ export default function UnifiedLogin() {
     });
     const [password2, setPassword2] = useState('')
 
+    const handleSubmit = async (e:any) => {
+        e.preventDefault();
+        try {
+            const response = await api.post(`/login`, {
+              usr_email: activeTab=='admin'? adminEmail: staffEmail,
+              usr_password: activeTab=='admin'? adminPassword: staffPassword,
+              switch: activeTab=='admin'? 'admin' : null
+            });
+
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+
+            // navigate('/dashboard');
+            {activeTab == 'admin' ? (
+              navigate('/admin/dashboard')
+            ) : (
+              navigate('/staff/dashboard')
+            )}
+        }
+        catch(error) {
+            // console.error('Error:', error.response.data); // use only to remove warning on vscode
+        }
+    };
   // #endregion
 
   return (
@@ -78,6 +91,8 @@ export default function UnifiedLogin() {
 
             {/* Tabs */}
             <div className="flex border-b border-gray-200">
+
+              {/* a. staff */}
               <button
                 onClick={() => {
                   setActiveTab("staff");
@@ -94,22 +109,28 @@ export default function UnifiedLogin() {
                   <span>{type === "register" ? "User Register" : "User Login"}</span>
                 </div>
               </button>
-              <button
-                onClick={() => {
-                  setActiveTab("admin");
-                  setAdminError("");
-                }}
-                className={`flex-1 py-4 px-6 font-medium text-sm transition-all ${
-                  activeTab === "admin"
-                    ? "border-b-2 border-[#1e3a8a] text-[#1e3a8a] bg-blue-50"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <GraduationCap className="w-4 h-4" />
-                  <span>{type === "register" ? "Admin Register" : "Admin Login"}</span>
-                </div>
-              </button>
+
+              {/* b. admin */}
+              {type == 'login' && (
+                <button
+                  onClick={() => {
+                    setActiveTab("admin");
+                    setAdminError("");
+                  }}
+                  className={`flex-1 py-4 px-6 font-medium text-sm transition-all ${
+                    activeTab === "admin"
+                      ? "border-b-2 border-[#1e3a8a] text-[#1e3a8a] bg-blue-50"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <GraduationCap className="w-4 h-4" />
+                    {/* <span>{type === "register" ? "Admin Register" : "Admin Login"}</span> */}
+                    <span>Admin Login</span>
+                  </div>
+                </button>
+              )}
+
             </div>
 
             {/* Forms Container */}
@@ -119,7 +140,7 @@ export default function UnifiedLogin() {
 
                   {/* Staff Login Form */}
                   {activeTab === "staff" && (
-                    <form onSubmit={handleStaffLogin} className="space-y-5">
+                    <form onSubmit={handleSubmit} className="space-y-5">
                       <div>
                         <label className="text-sm font-medium text-gray-700 block mb-2">
                           Email Address
@@ -127,10 +148,10 @@ export default function UnifiedLogin() {
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                           <input
-                            type="email"
+                            // type="email"
                             value={staffEmail}
                             onChange={(e) => setStaffEmail(e.target.value)}
-                            placeholder="Enter you email address"
+                            placeholder="Enter your email address"
                             className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d97706] focus:border-transparent transition-all"
                             required
                           />
@@ -173,7 +194,7 @@ export default function UnifiedLogin() {
 
                       <button
                         type="submit"
-                        className="w-full py-3 bg-gradient-to-r from-[#d97706] to-[#ea580c] text-white rounded-lg font-medium hover:from-[#ea580c] hover:to-[#d97706] transition-all shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2"
+                        className="cursor-pointer w-full py-3 bg-gradient-to-r from-[#d97706] to-[#ea580c] text-white rounded-lg font-medium hover:from-[#ea580c] hover:to-[#d97706] transition-all shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2"
                       >
                         <LogIn className="w-5 h-5" />
                         Sign In as User
@@ -199,7 +220,7 @@ export default function UnifiedLogin() {
 
                   {/* Admin Login Form */}
                   {activeTab === "admin" && (
-                    <form onSubmit={handleAdminLogin} className="space-y-5">
+                    <form onSubmit={handleSubmit} className="space-y-5">
                       {/* Error Message */}
                       {adminError && (
                         <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
@@ -210,15 +231,15 @@ export default function UnifiedLogin() {
 
                       <div>
                         <label className="text-sm font-medium text-gray-700 block mb-2">
-                          Username
+                          Email Address
                         </label>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                           <input
                             type="text"
-                            value={adminUsername}
-                            onChange={(e) => setAdminUsername(e.target.value)}
-                            placeholder="Enter username"
+                            value={adminEmail}
+                            onChange={(e) => setAdminEmail(e.target.value)}
+                            placeholder="Enter your email address"
                             className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent transition-all"
                             required
                           />
@@ -235,7 +256,7 @@ export default function UnifiedLogin() {
                             type={showAdminPassword ? "text" : "password"}
                             value={adminPassword}
                             onChange={(e) => setAdminPassword(e.target.value)}
-                            placeholder="Enter password"
+                            placeholder="Enter your password"
                             className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent transition-all"
                             required
                           />
@@ -251,7 +272,7 @@ export default function UnifiedLogin() {
 
                       <button
                         type="submit"
-                        className="w-full py-3 bg-[#1e3a8a] text-white rounded-lg font-medium hover:bg-[#1e293b] transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
+                        className="cursor-pointer w-full py-3 bg-[#1e3a8a] text-white rounded-lg font-medium hover:bg-[#1e293b] transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
                       >
                         <LogIn className="w-5 h-5" />
                         Sign In as Admin
@@ -277,7 +298,7 @@ export default function UnifiedLogin() {
                   {/* Staff Login Form */}
                   {activeTab === "staff" && (
                     <>
-                      <form onSubmit={handleStaffLogin} className="space-y-5">
+                      <form onSubmit={handleRegister} className="space-y-5">
                         
                         <div className="space-y-4">
                             {/* for all role */}
@@ -332,7 +353,7 @@ export default function UnifiedLogin() {
                             />
                         </div>
 
-                        <button type="submit" className="w-full py-3 bg-gradient-to-r from-[#d97706] to-[#ea580c] text-white rounded-lg font-medium hover:from-[#ea580c] hover:to-[#d97706] transition-all shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2">
+                        <button type="submit" className="cursor-pointer w-full py-3 bg-gradient-to-r from-[#d97706] to-[#ea580c] text-white rounded-lg font-medium hover:from-[#ea580c] hover:to-[#d97706] transition-all shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2">
                           <UserPlusIcon className="w-5 h-5" />
                           Create Account
                         </button>
@@ -346,68 +367,6 @@ export default function UnifiedLogin() {
                             </span>
                         </p>
                       </>
-                  )}
-
-                  {/* Admin Login Form */}
-                  {activeTab === "admin" && (
-                    <form onSubmit={handleAdminLogin} className="space-y-5">
-                      {/* Error Message */}
-                      {adminError && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
-                          <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                          <p className="text-sm">{adminError}</p>
-                        </div>
-                      )}
-
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-2">
-                          Username
-                        </label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                          <input
-                            type="text"
-                            value={adminUsername}
-                            onChange={(e) => setAdminUsername(e.target.value)}
-                            placeholder="Enter username"
-                            className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent transition-all"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-2">
-                          Password
-                        </label>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                          <input
-                            type={showAdminPassword ? "text" : "password"}
-                            value={adminPassword}
-                            onChange={(e) => setAdminPassword(e.target.value)}
-                            placeholder="Enter password"
-                            className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent transition-all"
-                            required
-                          />
-                          <button
-                            type="button"
-                            className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
-                            onClick={() => setShowAdminPassword(!showAdminPassword)}
-                          >
-                            {showAdminPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                          </button>
-                        </div>
-                      </div>
-
-                      <button
-                        type="submit"
-                        className="w-full py-3 bg-[#1e3a8a] text-white rounded-lg font-medium hover:bg-[#1e293b] transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
-                      >
-                        <LogIn className="w-5 h-5" />
-                        Sign In as Admin
-                      </button>
-                    </form>
                   )}
 
                 </div>

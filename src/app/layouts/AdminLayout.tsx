@@ -19,18 +19,23 @@ import {
   NotebookText,
 } from "lucide-react";
 import exibyteLogo from "figma:asset/a4cfe9bd1927990d0a64f23cf7f0aeef602f8fa0.png";
+import api from "../api/axios";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminAuth");
-    navigate("/login");
+  const handleLogout = async() => {
+      await api.post(`/logout`);
+
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+
+      navigate('/login');
   };
 
   const navItems = [
-    { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/users", label: "Users", icon: Users },
     { path: "/admin/courses", label: "Courses", icon: BookOpen },
     { path: "/admin/assessment", label: "Assessment", icon: NotebookText },

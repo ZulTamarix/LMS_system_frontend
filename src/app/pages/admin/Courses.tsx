@@ -96,45 +96,6 @@ export default function Courses() {
   //#endregion
 
 
-  // #region 3_old) --> method
-
-    const handleViewDetails = (course: any) => {
-      setSelectedCourse(course);
-      setShowCourseDetailModal(true);
-    };
-
-    const handleEditCourse = (course: any) => {
-      setSelectedCourse(course);
-      setShowCourseDetailModal(false);
-      setShowEditCourseModal(true);
-      setEditTab("details");
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      // Handle form submission
-      setShowAddCourseModal(false);
-      // Reset form
-      setFormData({
-        title: "",
-        category: "Mandatory",
-        duration: "",
-        description: "",
-        instructor: "",
-        modules: "",
-        videos: "",
-        quizzes: "",
-        enrollmentLimit: "",
-        status: "Active",
-      });
-    };
-    // #endregion
-
-
   // #region 3) -> method
 
     // READ course
@@ -156,7 +117,7 @@ export default function Courses() {
         }
         catch(error) {
             console.error('Error:', error); // use only to remove warning on vscode
-            // console.error('Response status:', error.response?.data);
+            console.error('Response status:', error.response?.data);
         }
         finally {
             setIsLoading(false)
